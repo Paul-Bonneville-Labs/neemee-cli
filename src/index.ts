@@ -2,7 +2,7 @@
 import { Command } from 'commander';
 import { notesCommand } from './commands/notes.js';
 import { notebooksCommand } from './commands/notebooks.js';
-import { writeConfig, readConfig, getBaseUrl } from './config.js';
+import { writeConfig, readConfig, getBaseUrl, getApiKeySource } from './config.js';
 import { api } from './api.js';
 
 const program = new Command();
@@ -10,7 +10,7 @@ const program = new Command();
 program
   .name('neemee')
   .description('CLI for Neemee notes')
-  .version('0.1.0');
+  .version('0.2.0');
 
 // Config commands
 const config = new Command('config').description('Manage CLI configuration');
@@ -35,8 +35,13 @@ config
   .command('show')
   .description('Show current configuration')
   .action(() => {
-    const cfg = readConfig();
-    console.log(`API Key: ${cfg.apiKey ? `${cfg.apiKey.substring(0, 8)}...` : '(not set)'}`);
+    const source = getApiKeySource();
+    const envKey = process.env.NEEMEE_API_KEY?.trim();
+    const cfgKey = readConfig().apiKey;
+    const activeKey = envKey ?? cfgKey;
+    const preview = activeKey ? `${activeKey.substring(0, 8)}...` : '(not set)';
+    const sourceLabel = source === 'env' ? ' (from NEEMEE_API_KEY)' : source === 'config' ? ' (from config file)' : '';
+    console.log(`API Key: ${preview}${sourceLabel}`);
     console.log(`Base URL: ${getBaseUrl()}`);
   });
 

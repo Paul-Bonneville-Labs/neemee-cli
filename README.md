@@ -12,11 +12,29 @@ Requires Node.js 18+.
 
 ## Setup
 
-Generate an API key at **neemee.app/settings → API Keys** (select `read` and/or `write` scopes), then configure the CLI:
+Generate an API key at **neemee.app/settings → API Keys** (select `read` and/or `write` scopes). The CLI looks for a key in this order:
+
+1. `NEEMEE_API_KEY` environment variable (recommended for shells/scripts/CI)
+2. `~/.config/neemee/config.json` (set via `neemee config set-key`)
+
+**Option 1 — environment variable** (add to `~/.zshrc` or `~/.bashrc`):
+
+```bash
+export NEEMEE_API_KEY="your-api-key-here"
+# Optional: override base URL (default: https://neemee.app)
+# export NEEMEE_BASE_URL="http://localhost:3100"
+```
+
+**Option 2 — config file**:
 
 ```bash
 neemee config set-key <your-api-key>
-neemee config whoami   # Verify the key works
+```
+
+Then verify:
+
+```bash
+neemee config whoami
 ```
 
 ## Commands

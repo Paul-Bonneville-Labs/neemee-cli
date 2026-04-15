@@ -26,14 +26,23 @@ export function writeConfig(updates: Partial<Config>): void {
 }
 
 export function getApiKey(): string {
+  const envKey = process.env.NEEMEE_API_KEY?.trim();
+  if (envKey) return envKey;
+
   const config = readConfig();
   if (!config.apiKey) {
-    console.error('No API key configured. Run: neemee config set-key <your-api-key>');
+    console.error('No API key configured. Set NEEMEE_API_KEY env var or run: neemee config set-key <your-api-key>');
     process.exit(1);
   }
   return config.apiKey;
 }
 
+export function getApiKeySource(): 'env' | 'config' | 'none' {
+  if (process.env.NEEMEE_API_KEY?.trim()) return 'env';
+  if (readConfig().apiKey) return 'config';
+  return 'none';
+}
+
 export function getBaseUrl(): string {
-  return readConfig().baseUrl ?? 'https://neemee.app';
+  return process.env.NEEMEE_BASE_URL?.trim() || readConfig().baseUrl || 'https://neemee.app';
 }
