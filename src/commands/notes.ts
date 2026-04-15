@@ -72,6 +72,30 @@ export function notesCommand(): Command {
     });
 
   notes
+    .command('update <id>')
+    .description('Update a note (content is required by the API, even for a title-only change)')
+    .requiredOption('-c, --content <text>', 'New note content (markdown) — required')
+    .option('-t, --title <title>', 'New note title')
+    .option('-u, --url <url>', 'New source URL')
+    .option('-n, --notebook <id>', 'Move to this notebook (use "none" to detach)')
+    .action(async (id: string, opts) => {
+      try {
+        const body: { content: string; noteTitle?: string; pageUrl?: string; notebookId?: string | null } = {
+          content: opts.content,
+        };
+        if (opts.title !== undefined) body.noteTitle = opts.title;
+        if (opts.url !== undefined) body.pageUrl = opts.url;
+        if (opts.notebook !== undefined) body.notebookId = opts.notebook === 'none' ? null : opts.notebook;
+
+        const note = await api.notes.update(id, body);
+        console.log(`Updated note: ${note.id} — ${note.noteTitle}`);
+      } catch (e) {
+        console.error('Error:', (e as Error).message);
+        process.exit(1);
+      }
+    });
+
+  notes
     .command('delete <id>')
     .description('Delete a note')
     .action(async (id: string) => {

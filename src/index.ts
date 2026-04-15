@@ -2,6 +2,7 @@
 import { Command } from 'commander';
 import { notesCommand } from './commands/notes.js';
 import { notebooksCommand } from './commands/notebooks.js';
+import { frontmatterGuideCommand } from './commands/frontmatter.js';
 import { writeConfig, readConfig, getBaseUrl, getApiKeySource } from './config.js';
 import { api } from './api.js';
 
@@ -10,7 +11,7 @@ const program = new Command();
 program
   .name('neemee')
   .description('CLI for Neemee notes')
-  .version('0.2.0');
+  .version('0.3.0');
 
 // Config commands
 const config = new Command('config').description('Manage CLI configuration');
@@ -61,6 +62,7 @@ config
 program.addCommand(config);
 program.addCommand(notesCommand());
 program.addCommand(notebooksCommand());
+program.addCommand(frontmatterGuideCommand());
 
 program
   .command('search <query>')

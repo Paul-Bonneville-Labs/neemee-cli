@@ -45,14 +45,19 @@ neemee config whoami
 neemee notes list [--search <q>] [--notebook <id>] [--limit 20] [--page 1]
 neemee notes get <id>
 neemee notes create --content "My note content" [--title "Title"] [--url <url>] [--notebook <id>]
+neemee notes update <id> --content "Updated content" [--title "..."] [--url <...>] [--notebook <id|none>]
 neemee notes delete <id>
 ```
+
+> **Note:** `notes update` requires `--content` — the REST API treats `content` as mandatory on PUT even for a title-only edit.
 
 ### Notebooks
 
 ```bash
-neemee notebooks list
+neemee notebooks list [--search <q>] [--limit 20] [--page 1]
+neemee notebooks get <id>
 neemee notebooks create --name "My notebook" [--description "..."]
+neemee notebooks update <id> [--name "..."] [--description "..."]
 neemee notebooks delete <id>
 ```
 
@@ -64,7 +69,15 @@ Shortcut for `notes list --search`:
 neemee search "<query>"
 ```
 
-Searches across content, note title, URL, source domain, notebook name, and frontmatter values.
+Searches across content, note title, URL, source domain, notebook name, and frontmatter values. To search notebooks instead, use `neemee notebooks list --search "<query>"`.
+
+### Frontmatter format guide
+
+```bash
+neemee frontmatter-guide [--type basic|research|task|article]
+```
+
+Prints a reference guide with examples for the YAML frontmatter format Neemee uses on notes.
 
 ### Configuration
 

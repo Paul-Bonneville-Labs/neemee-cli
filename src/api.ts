@@ -47,6 +47,19 @@ export interface PaginatedNotebooks {
   pagination: { page: number; limit: number; total: number };
 }
 
+export interface NoteUpdate {
+  content: string;                 // Required by the API even on partial updates
+  noteTitle?: string;
+  pageUrl?: string;
+  notebookId?: string | null;
+  frontmatter?: Record<string, unknown>;
+}
+
+export interface NotebookUpdate {
+  name?: string;
+  description?: string;
+}
+
 export const api = {
   notes: {
     list: (params: Record<string, string> = {}) => {
@@ -56,13 +69,20 @@ export const api = {
     get: (id: string) => request<Note>(`/api/notes/${id}`),
     create: (body: { content: string; noteTitle?: string; pageUrl?: string; notebookId?: string }) =>
       request<Note>('/api/notes', { method: 'POST', body: JSON.stringify(body) }),
+    update: (id: string, body: NoteUpdate) =>
+      request<Note>(`/api/notes/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
     delete: (id: string) => request<void>(`/api/notes/${id}`, { method: 'DELETE' }),
   },
   notebooks: {
-    list: () => request<PaginatedNotebooks>('/api/notebooks'),
+    list: (params: Record<string, string> = {}) => {
+      const qs = new URLSearchParams(params).toString();
+      return request<PaginatedNotebooks>(`/api/notebooks${qs ? `?${qs}` : ''}`);
+    },
     get: (id: string) => request<Notebook>(`/api/notebooks/${id}`),
     create: (body: { name: string; description?: string }) =>
       request<Notebook>('/api/notebooks', { method: 'POST', body: JSON.stringify(body) }),
+    update: (id: string, body: NotebookUpdate) =>
+      request<Notebook>(`/api/notebooks/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
     delete: (id: string) => request<void>(`/api/notebooks/${id}`, { method: 'DELETE' }),
   },
   user: {
