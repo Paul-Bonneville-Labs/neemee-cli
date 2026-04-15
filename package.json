@@ -2,8 +2,8 @@
   "name": "neemee-cli",
   "version": "0.2.0",
   "description": "Command-line client for the Neemee notes API",
-  "bin": { "neemee": "./dist/index.js" },
-  "main": "./dist/index.js",
+  "bin": { "neemee": "dist/index.js" },
+  "main": "dist/index.js",
   "files": [
     "dist",
     "README.md",
@@ -23,7 +23,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Paul-Bonneville-Labs/neemee-cli.git"
+    "url": "git+https://github.com/Paul-Bonneville-Labs/neemee-cli.git"
   },
   "homepage": "https://github.com/Paul-Bonneville-Labs/neemee-cli#readme",
   "bugs": {
