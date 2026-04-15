@@ -1,0 +1,41 @@
+{
+  "name": "neemee-cli",
+  "version": "0.1.0",
+  "description": "Command-line client for the Neemee notes API",
+  "bin": { "neemee": "./dist/index.js" },
+  "main": "./dist/index.js",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/index.ts",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "neemee",
+    "cli",
+    "notes"
+  ],
+  "author": "Paul Bonneville",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Paul-Bonneville-Labs/neemee-cli.git"
+  },
+  "homepage": "https://github.com/Paul-Bonneville-Labs/neemee-cli#readme",
+  "bugs": {
+    "url": "https://github.com/Paul-Bonneville-Labs/neemee-cli/issues"
+  },
+  "dependencies": {
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.0"
+  },
+  "engines": { "node": ">=18" }
+}
