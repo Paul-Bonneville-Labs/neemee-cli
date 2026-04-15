@@ -10,6 +10,12 @@ export function notebooksCommand(): Command {
     .option('-p, --page <n>', 'Page number', '1')
     .option('-l, --limit <n>', 'Results per page (max 100)', '20')
     .option('-s, --search <query>', 'Search by name or description')
+    .addHelpText('after', `
+Examples:
+  $ neemee notebooks list
+  $ neemee notebooks list --search "AI"
+  $ neemee notebooks list --limit 100
+`)
     .action(async (opts) => {
       try {
         const params: Record<string, string> = { page: opts.page, limit: opts.limit };
@@ -38,6 +44,10 @@ export function notebooksCommand(): Command {
   notebooks
     .command('get <id>')
     .description('Get a single notebook by ID')
+    .addHelpText('after', `
+Example:
+  $ neemee notebooks get cmeloc622000116fs5ap6yngs
+`)
     .action(async (id: string) => {
       try {
         const nb = await api.notebooks.get(id);
@@ -56,6 +66,11 @@ export function notebooksCommand(): Command {
     .description('Create a new notebook')
     .requiredOption('-n, --name <name>', 'Notebook name')
     .option('-d, --description <desc>', 'Description')
+    .addHelpText('after', `
+Examples:
+  $ neemee notebooks create -n "Meeting Notes"
+  $ neemee notebooks create -n "Book Highlights" -d "Quotes and insights from reading"
+`)
     .action(async (opts) => {
       try {
         const nb = await api.notebooks.create({ name: opts.name, description: opts.description });
@@ -71,6 +86,12 @@ export function notebooksCommand(): Command {
     .description('Update a notebook (name and/or description)')
     .option('-n, --name <name>', 'New name')
     .option('-d, --description <desc>', 'New description')
+    .addHelpText('after', `
+Examples:
+  $ neemee notebooks update cmeloc622000116fs5ap6yngs -n "AI Research"
+  $ neemee notebooks update cmeloc622000116fs5ap6yngs -d "Refreshed description"
+  $ neemee notebooks update cmeloc622000116fs5ap6yngs -n "Both" -d "At once"
+`)
     .action(async (id: string, opts) => {
       try {
         if (opts.name === undefined && opts.description === undefined) {
@@ -92,6 +113,10 @@ export function notebooksCommand(): Command {
   notebooks
     .command('delete <id>')
     .description('Delete a notebook')
+    .addHelpText('after', `
+Example:
+  $ neemee notebooks delete cmeloc622000116fs5ap6yngs
+`)
     .action(async (id: string) => {
       try {
         await api.notebooks.delete(id);
