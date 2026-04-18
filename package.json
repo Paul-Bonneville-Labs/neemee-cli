@@ -1,6 +1,6 @@
 {
   "name": "neemee-cli",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Command-line client for the Neemee notes API",
   "bin": { "neemee": "dist/index.js" },
   "main": "dist/index.js",

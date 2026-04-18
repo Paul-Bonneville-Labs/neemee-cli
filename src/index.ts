@@ -11,7 +11,7 @@ const program = new Command();
 program
   .name('neemee')
   .description('CLI for Neemee notes')
-  .version('0.3.1')
+  .version('0.3.2')
   .addHelpText('after', `
 Getting started:
   1. Generate an API key at https://neemee.app/settings -> API Keys
@@ -25,6 +25,7 @@ Common workflows:
                               neemee notes list --search "<query>" --limit 50
   Browse notebooks            neemee notebooks list
   Organize a note             neemee notes update <noteId> -c "<content>" -n <notebookId>
+  Email a note                neemee notes email <noteId> --to you@example.com
   View full note              neemee notes get <noteId>
   Frontmatter reference       neemee frontmatter-guide --type basic
 
