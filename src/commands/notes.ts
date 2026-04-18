@@ -140,5 +140,42 @@ Example:
       }
     });
 
+  notes
+    .command('email <id>')
+    .description('Email a note to one or more recipients')
+    .requiredOption('-t, --to <email>', 'Recipient email address (repeat for multiple)', (val: string, acc: string[]) => [...acc, val], [] as string[])
+    .option('-m, --message <text>', 'Optional personal message to include')
+    .addHelpText('after', `
+Examples:
+  $ neemee notes email cmo4us3pq000135fz1uceazig --to alice@example.com
+  $ neemee notes email cmo4us3pq000135fz1uceazig --to alice@example.com --to bob@example.com
+  $ neemee notes email cmo4us3pq000135fz1uceazig --to alice@example.com --message "Thought you'd like this"
+
+Notes:
+  * Up to 50 recipients per send
+  * The note must belong to your account
+`)
+    .action(async (id: string, opts) => {
+      try {
+        const result = await api.notes.share(id, {
+          recipients: opts.to,
+          message: opts.message,
+        });
+        if (result.failed === 0) {
+          console.log(`Sent to ${result.sent} recipient${result.sent === 1 ? '' : 's'}.`);
+        } else {
+          console.log(`Sent: ${result.sent}, Failed: ${result.failed}`);
+          if (result.failures?.length) {
+            for (const f of result.failures) {
+              console.error(`  ${f.email}: ${f.error}`);
+            }
+          }
+        }
+      } catch (e) {
+        console.error('Error:', (e as Error).message);
+        process.exit(1);
+      }
+    });
+
   return notes;
 }
