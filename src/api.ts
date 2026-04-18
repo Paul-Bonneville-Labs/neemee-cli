@@ -60,6 +60,12 @@ export interface NotebookUpdate {
   description?: string;
 }
 
+export interface ShareResult {
+  sent: number;
+  failed: number;
+  failures?: { email: string; error: string }[];
+}
+
 export const api = {
   notes: {
     list: (params: Record<string, string> = {}) => {
@@ -72,6 +78,8 @@ export const api = {
     update: (id: string, body: NoteUpdate) =>
       request<Note>(`/api/notes/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
     delete: (id: string) => request<void>(`/api/notes/${id}`, { method: 'DELETE' }),
+    share: (id: string, body: { recipients: string[]; message?: string }) =>
+      request<ShareResult>(`/api/notes/${id}/share`, { method: 'POST', body: JSON.stringify(body) }),
   },
   notebooks: {
     list: (params: Record<string, string> = {}) => {
