@@ -1,54 +1,24 @@
+import { NeemeeClient } from '@neemee/shared';
 import { getApiKey, getBaseUrl } from './config.js';
 
-async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
-  const url = `${getBaseUrl()}${path}`;
-  const res = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${getApiKey()}`,
-      ...options.headers,
-    },
-  });
+export type {
+  Note,
+  Notebook,
+  Frontmatter,
+  CreateNoteInput,
+  UpdateNoteInput,
+  PaginatedNotes,
+  PaginatedNotebooks,
+} from '@neemee/shared';
 
-  const body = await res.json() as { success: boolean; data?: T; error?: string };
-
-  if (!res.ok || !body.success) {
-    throw new Error(body.error ?? `HTTP ${res.status}`);
-  }
-
-  return body.data as T;
-}
-
-export interface Note {
-  id: string;
-  noteTitle: string;
-  content: string;
-  pageUrl: string | null;
-  createdAt: string;
-  updatedAt: string;
-  notebook?: { id: string; name: string } | null;
-}
-
-export interface Notebook {
-  id: string;
-  name: string;
-  description: string | null;
-  _count?: { notes: number };
-}
-
-export interface PaginatedNotes {
-  notes: Note[];
-  pagination: { page: number; limit: number; total: number };
-}
-
-export interface PaginatedNotebooks {
-  notebooks: Notebook[];
-  pagination: { page: number; limit: number; total: number };
+export interface ShareResult {
+  sent: number;
+  failed: number;
+  failures?: { email: string; error: string }[];
 }
 
 export interface NoteUpdate {
-  content: string;                 // Required by the API even on partial updates
+  content: string;
   noteTitle?: string;
   pageUrl?: string;
   notebookId?: string | null;
@@ -60,40 +30,72 @@ export interface NotebookUpdate {
   description?: string;
 }
 
-export interface ShareResult {
-  sent: number;
-  failed: number;
-  failures?: { email: string; error: string }[];
+let cachedClient: NeemeeClient | undefined;
+function client(): NeemeeClient {
+  if (!cachedClient) {
+    cachedClient = new NeemeeClient({ apiKey: getApiKey(), baseUrl: getBaseUrl() });
+  }
+  return cachedClient;
+}
+
+async function rawRequest<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const url = `${getBaseUrl()}${path}`;
+  const res = await fetch(url, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${getApiKey()}`,
+      ...options.headers,
+    },
+  });
+  const body = (await res.json()) as { success: boolean; data?: T; error?: string };
+  if (!res.ok || !body.success) {
+    throw new Error(body.error ?? `HTTP ${res.status}`);
+  }
+  return body.data as T;
 }
 
 export const api = {
   notes: {
     list: (params: Record<string, string> = {}) => {
-      const qs = new URLSearchParams(params).toString();
-      return request<PaginatedNotes>(`/api/notes/list${qs ? `?${qs}` : ''}`);
+      const c = client();
+      const numericPage = params.page ? Number(params.page) : undefined;
+      const numericLimit = params.limit ? Number(params.limit) : undefined;
+      return c.notes.list({
+        page: numericPage,
+        limit: numericLimit,
+        notebookId: params.notebookId,
+        search: params.search,
+      });
     },
-    get: (id: string) => request<Note>(`/api/notes/${id}`),
-    create: (body: { content: string; noteTitle?: string; pageUrl?: string; notebookId?: string }) =>
-      request<Note>('/api/notes', { method: 'POST', body: JSON.stringify(body) }),
-    update: (id: string, body: NoteUpdate) =>
-      request<Note>(`/api/notes/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
-    delete: (id: string) => request<void>(`/api/notes/${id}`, { method: 'DELETE' }),
+    get: (id: string) => client().notes.get(id),
+    create: (body: {
+      content: string;
+      noteTitle?: string;
+      pageUrl?: string;
+      notebookId?: string;
+    }) => client().notes.create(body),
+    update: (id: string, body: NoteUpdate) => client().notes.update(id, body),
+    delete: (id: string) => client().notes.delete(id),
     share: (id: string, body: { recipients: string[]; message?: string }) =>
-      request<ShareResult>(`/api/notes/${id}/share`, { method: 'POST', body: JSON.stringify(body) }),
+      rawRequest<ShareResult>(`/api/notes/${id}/share`, {
+        method: 'POST',
+        body: JSON.stringify(body),
+      }),
   },
   notebooks: {
     list: (params: Record<string, string> = {}) => {
-      const qs = new URLSearchParams(params).toString();
-      return request<PaginatedNotebooks>(`/api/notebooks${qs ? `?${qs}` : ''}`);
+      const c = client();
+      const numericPage = params.page ? Number(params.page) : undefined;
+      const numericLimit = params.limit ? Number(params.limit) : undefined;
+      return c.notebooks.list({ page: numericPage, limit: numericLimit });
     },
-    get: (id: string) => request<Notebook>(`/api/notebooks/${id}`),
-    create: (body: { name: string; description?: string }) =>
-      request<Notebook>('/api/notebooks', { method: 'POST', body: JSON.stringify(body) }),
-    update: (id: string, body: NotebookUpdate) =>
-      request<Notebook>(`/api/notebooks/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
-    delete: (id: string) => request<void>(`/api/notebooks/${id}`, { method: 'DELETE' }),
+    get: (id: string) => client().notebooks.get(id),
+    create: (body: { name: string; description?: string }) => client().notebooks.create(body),
+    update: (id: string, body: NotebookUpdate) => client().notebooks.update(id, body),
+    delete: (id: string) => client().notebooks.delete(id),
   },
   user: {
-    me: () => request<{ id: string; email: string; name: string }>('/api/user/me'),
+    me: () => rawRequest<{ id: string; email: string; name: string }>('/api/user/me'),
   },
 };
